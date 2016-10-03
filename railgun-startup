@@ -1,0 +1,16 @@
+#!/bin/env bash
+
+[ -z "$TOKEN" ] && { echo "Missing TOKEN"; exit 1; }
+[ -z "$PUBLIC_HOSTNAME" ] && { echo "Missing PUBLIC_HOSTNAME"; exit 1; }
+
+echo "Updating Config file"
+
+sed -i -e "s/YOUR_TOKEN_HERE/${TOKEN}/" \
+-e "s/YOUR_PUBLIC_IP_OR_HOSTNAME/${PUBLIC_HOSTNAME}/" \
+-e "s/127.0.0.1:11211/${MEMCACHED_HOST:-memcached}:${MEMCACHED_PORT:-11211}/" \
+-e "s/log.level = 0/log.level = ${LOG_LEVEL:-0}/" \
+-e "s/memcached.limit = 1000000/memcached.limit = ${MEMCACHED_LIMIT:-1000000}/" /etc/railgun/railgun.conf
+
+echo "Starting Railgun"
+RAILGUN_PATH=$(/usr/bin/which rg-listener)
+$RAILGUN_PATH -config "/etc/railgun/railgun.conf"
